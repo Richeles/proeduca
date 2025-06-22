@@ -1,23 +1,68 @@
-import Image from 'next/image';
+'use client';
+
+import { useState } from 'react';
+import { gerarTextoComIA } from '../lib/openrouter';
 
 export default function Home() {
-  return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-blue-50 p-8">
-      
-      <h1 className="text-4xl font-bold mb-6">Bem-vindo ao Meu Projeto!</h1>
+  const [prompt, setPrompt] = useState('Crie um roteiro de aula sobre inteligência artificial para alunos do ensino médio.');
+  const [resposta, setResposta] = useState('');
+  const [carregando, setCarregando] = useState(false);
 
-      <Image 
-        src="/images/teacher-happy.jpg" 
-        alt="Professor feliz" 
-        width={500} 
-        height={400} 
-        className="rounded-2xl shadow-lg"
+  async function handleGerar() {
+    if (!prompt.trim()) {
+      alert('Por favor, digite um prompt para gerar o texto.');
+      return;
+    }
+
+    setCarregando(true);
+    setResposta('');
+    try {
+      const resultado = await gerarTextoComIA(prompt);
+      setResposta(resultado);
+    } catch (error) {
+      setResposta('Erro ao gerar texto. Tente novamente.');
+      console.error(error);
+    }
+    setCarregando(false);
+  }
+
+  return (
+    <main style={{ padding: '20px', maxWidth: '600px', margin: '0 auto', fontFamily: 'Arial, sans-serif' }}>
+      <h1>Gerador de Roteiros com IA</h1>
+
+      <textarea
+        value={prompt}
+        onChange={(e) => setPrompt(e.target.value)}
+        rows={4}
+        style={{ width: '100%', padding: '10px', fontSize: '16px', marginTop: '10px' }}
       />
 
-      <p className="mt-6 text-lg text-gray-700">
-        Esta é uma imagem carregada da pasta public/images do projeto.
-      </p>
-      
+      <button
+        onClick={handleGerar}
+        disabled={carregando}
+        style={{
+          marginTop: '10px',
+          padding: '10px 20px',
+          fontSize: '16px',
+          cursor: carregando ? 'not-allowed' : 'pointer',
+        }}
+      >
+        {carregando ? 'Gerando...' : 'Gerar com IA'}
+      </button>
+
+      <div
+        style={{
+          marginTop: '20px',
+          whiteSpace: 'pre-wrap',
+          backgroundColor: '#f0f0f0',
+          padding: '15px',
+          borderRadius: '8px',
+          minHeight: '100px',
+          fontSize: '16px',
+        }}
+      >
+        {resposta || 'A resposta aparecerá aqui.'}
+      </div>
     </main>
   );
 }
